@@ -16,6 +16,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.4.3",
     "@orderly.network/affiliate": "2.5.3",
     "@orderly.network/i18n": "2.5.3",
     "@orderly.network/markets": "2.5.3",
@@ -37,7 +41,9 @@
     "@solana/wallet-adapter-base": "^0.9.24",
     "@solana/wallet-adapter-wallets": "^0.19.36",
     "@tanstack/query-core": "^5.79.0",
+    "@walletconnect/web3-provider": "^1.8.0",
     "@web3-onboard/walletconnect": "^2.6.2",
+    "ethers": "^6.15.0",
     "isbot": "^4.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

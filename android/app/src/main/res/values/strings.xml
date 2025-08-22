@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">wztemp-0387</string>
+    <string name="title_activity_main">wztemp-0387</string>
+    <string name="package_name">com.orderlynetwork.wztemp0387</string>
+    <string name="custom_url_scheme">com.orderlynetwork.wztemp0387</string>
+</resources>
