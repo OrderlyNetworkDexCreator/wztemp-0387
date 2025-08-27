@@ -1,83 +1,88 @@
-import { PropsWithChildren, useState, useEffect } from "react";
-import { WalletConnectorContext } from "@orderly.network/hooks";
+import { PropsWithChildren, useEffect, useState } from "react";
+import { WalletConnectorContext, WalletState } from "@orderly.network/hooks";
 import { ChainNamespace } from "@orderly.network/types";
-import { WalletConnectModal } from "@walletconnect/modal";
-import { EthereumProvider } from "@walletconnect/ethereum-provider";
+import { createWeb3Modal, defaultWagmiConfig, useWeb3Modal } from "@web3modal/wagmi/react";
+import { WagmiProvider, useAccount as useWagmiAccount } from "wagmi";
+import { arbitrum, mainnet } from "wagmi/chains";
 
-const projectId = "6f801203e687cd27a89d00b68e0213cf";
-const chains = [1, 137];
+// 1. Get projectId at https://cloud.reown.com/
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
 
-export const WalletConnector = ({ children }: PropsWithChildren) => {
-  const [connecting, setConnecting] = useState(false);
-  const [wallet, setWallet] = useState<any>(null);
-  const [provider, setProvider] = useState<any>(null);
-  const [connectedChain, setConnectedChain] = useState<any>(null);
-  const [settingChain, setSettingChain] = useState(false);
+// 2. Create wagmiConfig
+const metadata = {
+  name: "Web3Modal",
+  description: "Web3Modal Example",
+  url: "https://web3modal.com",
+  icons: ["https://avatars.githubusercontent.com/u/37784886"]
+};
 
-  const connect = async () => {
-    setConnecting(true);
-    const ethProvider = await EthereumProvider.init({
-      projectId,
-      chains,
-      optionalChains: chains as [number, ...number[]],
-      showQrModal: false,
-      rpcMap: {
-        1: 'https://cloudflare-eth.com',
-        137: 'https://polygon-rpc.com',
-      },
-    });
-    const modal = new WalletConnectModal({ projectId });
-    await modal.openModal({ provider: ethProvider });
-    await ethProvider.enable();
-    setProvider(ethProvider);
-    setWallet({ provider: ethProvider });
-    setConnectedChain({ id: ethProvider.chainId, namespace: ChainNamespace.evm });
-    setConnecting(false);
-    return [];
-  };
+const chains = [mainnet, arbitrum] as const;
+export const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
 
-  const disconnect = async () => {
-    if (provider && provider.disconnect) {
-      await provider.disconnect();
-    }
-    setProvider(null);
-    setWallet(null);
-    setConnectedChain(null);
-    return [];
-  };
+// 3. Create modal
+createWeb3Modal({ wagmiConfig, projectId });
 
-  const setChain = async ({ chainId }: { chainId: string | number }) => {
-    setSettingChain(true);
-    const hexChainId = typeof chainId === 'number' ? '0x' + chainId.toString(16) : chainId;
-    if (provider && provider.request) {
-      await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChainId }] });
-      setConnectedChain({ id: chainId, namespace: ChainNamespace.evm });
-    }
-    setSettingChain(false);
-    return null;
-  };
+function WalletConnectorProvider({ children }: PropsWithChildren) {
+  const [wallet, setWallet] = useState<WalletState>({
+    chains: chains.map((chain) => ({
+      namespace: ChainNamespace.evm,
+      id: chain.id
+    })),
+    accounts: [],
+    icon: "",
+    label: "",
+    provider: null as any
+  });
 
-  const switchChain = async ({ chainId }: { chainId: string }) => {
-    return setChain({ chainId });
-  };
+  const { open } = useWeb3Modal();
+  const { address, isConnecting, chain, connector, status } = useWagmiAccount();
+
+  useEffect(() => {
+    const run = async () => {
+      if (!connector) return;
+      const accounts = await connector.getAccounts().then((addresses) =>
+        addresses.map((addr) => ({ address: addr }))
+      );
+      const provider = await connector.getProvider();
+      const label = (await connector.getClient?.().then((client) => client.name)) ?? "";
+      setWallet((prev) => ({
+        ...prev,
+        accounts,
+        provider: provider as any,
+        label
+      }));
+    };
+    run();
+  }, [address, connector]);
 
   return (
     <WalletConnectorContext.Provider
       value={{
-        connect,
-        disconnect,
-        connecting,
-        setChain,
-        chains,
-        wallet,
-        connectedChain,
-        settingChain,
+        connect: () => open().then(() => []),
+        disconnect: async () => {
+          connector?.disconnect();
+          return [];
+        },
+        setChain: async ({ chainId }) => {
+          return connector?.switchChain?.({ chainId: Number(chainId) });
+        },
+        chains: chains.slice(),
+        connectedChain: chain ? { id: chain.id, namespace: ChainNamespace.evm } : null,
         namespace: ChainNamespace.evm,
+        connecting: isConnecting,
+        settingChain: status === "reconnecting",
+        wallet
       }}
     >
       {children}
     </WalletConnectorContext.Provider>
   );
-};
+}
+
+export const WalletConnector = ({ children }: PropsWithChildren) => (
+  <WagmiProvider config={wagmiConfig}>
+    <WalletConnectorProvider>{children}</WalletConnectorProvider>
+  </WagmiProvider>
+);
 
 export default WalletConnector;
