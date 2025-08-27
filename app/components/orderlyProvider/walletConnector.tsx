@@ -1,33 +1,83 @@
-import { ReactNode } from 'react';
-import { WalletConnectorProvider } from '@orderly.network/wallet-connector';
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import type { NetworkId } from "@orderly.network/types";
-import { getEvmInitialConfig, getSolanaWallets } from '../../utils/walletConfig';
+import { PropsWithChildren, useState, useEffect } from "react";
+import { WalletConnectorContext } from "@orderly.network/hooks";
+import { ChainNamespace } from "@orderly.network/types";
+import { WalletConnectModal } from "@walletconnect/modal";
+import { EthereumProvider } from "@walletconnect/ethereum-provider";
 
-interface WalletConnectorProps {
-  children: ReactNode;
-  networkId: NetworkId;
-}
+const projectId = "6f801203e687cd27a89d00b68e0213cf";
+const chains = [1, 137];
 
-const WalletConnector = ({ children, networkId }: WalletConnectorProps) => {
-  const disableEVMWallets = import.meta.env.VITE_DISABLE_EVM_WALLETS === 'true';
-  const disableSolanaWallets = import.meta.env.VITE_DISABLE_SOLANA_WALLETS === 'true';
+export const WalletConnector = ({ children }: PropsWithChildren) => {
+  const [connecting, setConnecting] = useState(false);
+  const [wallet, setWallet] = useState<any>(null);
+  const [provider, setProvider] = useState<any>(null);
+  const [connectedChain, setConnectedChain] = useState<any>(null);
+  const [settingChain, setSettingChain] = useState(false);
 
-  const evmInitial = disableEVMWallets ? undefined : getEvmInitialConfig();
+  const connect = async () => {
+    setConnecting(true);
+    const ethProvider = await EthereumProvider.init({
+      projectId,
+      chains,
+      optionalChains: chains as [number, ...number[]],
+      showQrModal: false,
+      rpcMap: {
+        1: 'https://cloudflare-eth.com',
+        137: 'https://polygon-rpc.com',
+      },
+    });
+    const modal = new WalletConnectModal({ projectId });
+    await modal.openModal({ provider: ethProvider });
+    await ethProvider.enable();
+    setProvider(ethProvider);
+    setWallet({ provider: ethProvider });
+    setConnectedChain({ id: ethProvider.chainId, namespace: ChainNamespace.evm });
+    setConnecting(false);
+    return [];
+  };
 
-  const solanaInitial = disableSolanaWallets ? undefined : {
-    network: networkId === 'mainnet' ? WalletAdapterNetwork.Mainnet : WalletAdapterNetwork.Devnet,
-    wallets: getSolanaWallets(networkId),
+  const disconnect = async () => {
+    if (provider && provider.disconnect) {
+      await provider.disconnect();
+    }
+    setProvider(null);
+    setWallet(null);
+    setConnectedChain(null);
+    return [];
+  };
+
+  const setChain = async ({ chainId }: { chainId: string | number }) => {
+    setSettingChain(true);
+    const hexChainId = typeof chainId === 'number' ? '0x' + chainId.toString(16) : chainId;
+    if (provider && provider.request) {
+      await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChainId }] });
+      setConnectedChain({ id: chainId, namespace: ChainNamespace.evm });
+    }
+    setSettingChain(false);
+    return null;
+  };
+
+  const switchChain = async ({ chainId }: { chainId: string }) => {
+    return setChain({ chainId });
   };
 
   return (
-    <WalletConnectorProvider
-      solanaInitial={solanaInitial}
-      evmInitial={evmInitial}
+    <WalletConnectorContext.Provider
+      value={{
+        connect,
+        disconnect,
+        connecting,
+        setChain,
+        chains,
+        wallet,
+        connectedChain,
+        settingChain,
+        namespace: ChainNamespace.evm,
+      }}
     >
       {children}
-    </WalletConnectorProvider>
+    </WalletConnectorContext.Provider>
   );
 };
 
-export default WalletConnector; 
+export default WalletConnector;

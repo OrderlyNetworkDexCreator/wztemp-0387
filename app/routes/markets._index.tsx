@@ -11,17 +11,19 @@ export const meta: MetaFunction = () => {
 
 export default function MarketsPage() {
   return (
-    <MarketsHomePage
-      comparisonProps={{
-        exchangesIconSrc:
-          import.meta.env.VITE_HAS_SECONDARY_LOGO === "true"
-            ? "/logo-secondary.webp"
-            : undefined,
-        exchangesName:
-          import.meta.env.VITE_ORDERLY_BROKER_NAME
-            ? import.meta.env.VITE_ORDERLY_BROKER_NAME
-            : undefined,
-      }}
-    />
+    <div style={{ paddingTop: 'env(safe-area-inset-top, 24px)' }}>
+      <MarketsHomePage
+        comparisonProps={{
+          exchangesIconSrc:
+            import.meta.env.VITE_HAS_SECONDARY_LOGO === "true"
+              ? "/logo-secondary.webp"
+              : undefined,
+          exchangesName:
+            import.meta.env.VITE_ORDERLY_BROKER_NAME
+              ? import.meta.env.VITE_ORDERLY_BROKER_NAME
+              : undefined,
+        }}
+      />
+    </div>
   );
 }

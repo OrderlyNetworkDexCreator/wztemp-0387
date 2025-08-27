@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "remix vite:build",
+    "build-android": "remix vite:build && npx cap sync android",
     "build:spa": "tsx build.ts",
     "dev": "remix vite:dev",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
@@ -41,6 +42,8 @@
     "@solana/wallet-adapter-base": "^0.9.24",
     "@solana/wallet-adapter-wallets": "^0.19.36",
     "@tanstack/query-core": "^5.79.0",
+    "@walletconnect/ethereum-provider": "^2.21.8",
+    "@walletconnect/modal": "^2.7.0",
     "@walletconnect/web3-provider": "^1.8.0",
     "@web3-onboard/walletconnect": "^2.6.2",
     "ethers": "^6.15.0",

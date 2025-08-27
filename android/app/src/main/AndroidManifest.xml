@@ -22,6 +22,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+
+            <!-- Deep link intent filter for WalletConnect and universal links -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Custom scheme for your app, e.g. wztemp:// -->
+                <data android:scheme="wztemp" />
+            </intent-filter>
         </activity>
 
         <provider

@@ -18,7 +18,7 @@ export const meta: MetaFunction = () => {
 export function Layout({ children }: { children: React.ReactNode }) {
   const seoConfig = getSEOConfig();
   const defaultLanguage = getUserLanguage();
-  
+
   return (
     <html lang={seoConfig.language || defaultLanguage}>
       <head>
@@ -28,7 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body style={{ paddingTop: 'env(safe-area-inset-top, 24px)' }}>
         <OrderlyProvider>{children}</OrderlyProvider>
         <ScrollRestoration />
         <Scripts />
