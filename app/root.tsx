@@ -28,7 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body style={{ paddingTop: 'env(safe-area-inset-top, 24px)' }}>
+      <body style={{ paddingTop: 'env(safe-area-inset-top, 50px)' }}>
         <OrderlyProvider>{children}</OrderlyProvider>
         <ScrollRestoration />
         <Scripts />

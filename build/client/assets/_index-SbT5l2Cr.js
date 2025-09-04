@@ -1,0 +1,1 @@
+import{r as s}from"./index-TjLUG_Bo.js";import{D as o}from"./storage-V4NyRneJ.js";import{g as c}from"./seo-CnldTrz-.js";import{u as n,a as i}from"./index-DWebz2o4.js";const u=()=>{const t=c(),a=[];return[...t,...a]};function S(){const t=n(),[a]=i();return s.useEffect(()=>{const r=a.toString(),e=`/perp/${o}${r?`?${r}`:""}`;t(e)},[t,a]),null}export{S as default,u as meta};

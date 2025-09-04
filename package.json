@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "remix vite:build",
-    "build-android": "remix vite:build && npx cap sync android",
+    "build-android": "remix vite:build && npx cap copy android",
     "build:spa": "tsx build.ts",
     "dev": "remix vite:dev",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",

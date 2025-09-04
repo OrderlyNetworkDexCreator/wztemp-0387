@@ -1,0 +1,1 @@
+import{r as s}from"./index-TjLUG_Bo.js";import{g as n}from"./utils-D9K4jSdz.js";import{u as o,a as c}from"./index-DWebz2o4.js";const d=()=>[{title:n("Rewards")}];function m(){const r=o(),[e]=c();return s.useEffect(()=>{const a=e.toString(),t=a?`/rewards/trading?${a}`:"/rewards/trading";r(t,{replace:!0})},[r,e]),null}export{m as default,d as meta};
