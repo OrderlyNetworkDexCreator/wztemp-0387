@@ -60,11 +60,34 @@ function WalletConnectorProvider({ children }: PropsWithChildren) {
       value={{
         connect: () => open().then(() => []),
         disconnect: async () => {
-          connector?.disconnect();
+          if (connector) {
+            await connector.disconnect();
+          }
+          setWallet({
+            chains: chains.map((chain) => ({
+              namespace: ChainNamespace.evm,
+              id: chain.id
+            })),
+            accounts: [],
+            icon: "",
+            label: "",
+            provider: null as any
+          });
           return [];
         },
         setChain: async ({ chainId }) => {
-          return connector?.switchChain?.({ chainId: Number(chainId) });
+          if (connector && typeof connector.switchChain === "function") {
+            try {
+              await connector.switchChain({ chainId: Number(chainId) });
+              // Optionally, update state or notify success here
+            } catch (error) {
+              // Optionally, handle or notify error here
+              console.error("Failed to switch chain:", error);
+              throw error;
+            }
+          } else {
+            throw new Error("Chain switch not supported by connector");
+          }
         },
         chains: chains.slice(),
         connectedChain: chain ? { id: chain.id, namespace: ChainNamespace.evm } : null,
